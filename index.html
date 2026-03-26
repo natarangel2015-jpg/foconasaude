@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriPlanner Mulher</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>NutriPlanner Mulher</h1>
+    <p>Um painel para alcançar objetivos com estratégia: macros, hidratação, peso e medidas.</p>
+  </header>
+
+  <main class="layout">
+    <section class="card">
+      <h2>Objetivo e metas diárias</h2>
+      <form id="profileForm" class="grid-form">
+        <label>Peso atual (kg)
+          <input type="number" id="currentWeight" min="30" step="0.1" required />
+        </label>
+        <label>Peso meta (kg)
+          <input type="number" id="targetWeight" min="30" step="0.1" required />
+        </label>
+        <label>Calorias (kcal)
+          <input type="number" id="goalCalories" min="1000" step="10" required />
+        </label>
+        <label>Proteína (g)
+          <input type="number" id="goalProtein" min="10" step="1" required />
+        </label>
+        <label>Carboidrato (g)
+          <input type="number" id="goalCarbs" min="10" step="1" required />
+        </label>
+        <label>Gordura (g)
+          <input type="number" id="goalFat" min="10" step="1" required />
+        </label>
+        <label>Água (ml)
+          <input type="number" id="goalWater" min="500" step="100" required />
+        </label>
+        <button type="submit">Salvar metas</button>
+      </form>
+      <p id="goalSummary" class="muted"></p>
+    </section>
+
+    <section class="card">
+      <h2>Alimentos e macros</h2>
+      <form id="foodForm" class="grid-form">
+        <label>Nome do alimento
+          <input type="text" id="foodName" required />
+        </label>
+        <label>Porção base (g)
+          <input type="number" id="foodServing" min="1" step="1" value="100" required />
+        </label>
+        <label>Calorias
+          <input type="number" id="foodCalories" min="0" step="1" required />
+        </label>
+        <label>Proteína (g)
+          <input type="number" id="foodProtein" min="0" step="0.1" required />
+        </label>
+        <label>Carboidrato (g)
+          <input type="number" id="foodCarbs" min="0" step="0.1" required />
+        </label>
+        <label>Gordura (g)
+          <input type="number" id="foodFat" min="0" step="0.1" required />
+        </label>
+        <button type="submit">Salvar alimento</button>
+      </form>
+
+      <details class="api-box">
+        <summary>Buscar no Open Food Facts (opcional)</summary>
+        <form id="openFoodForm" class="inline-form">
+          <input type="text" id="offQuery" placeholder="Ex.: iogurte natural" required />
+          <button type="submit">Buscar</button>
+        </form>
+        <ul id="offResults" class="list compact"></ul>
+      </details>
+
+      <ul id="foodList" class="list"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Planejamento: quanto comer</h2>
+      <form id="plannerForm" class="grid-form">
+        <label>Data
+          <input type="date" id="plannerDate" required />
+        </label>
+        <label>Alimento
+          <select id="plannerFood" required></select>
+        </label>
+        <label>Priorizar macro
+          <select id="plannerMacro" required>
+            <option value="protein">Proteína</option>
+            <option value="carbs">Carboidrato</option>
+            <option value="fat">Gordura</option>
+            <option value="calories">Calorias</option>
+          </select>
+        </label>
+      </form>
+      <div id="plannerOutput" class="summary-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2>Refeições consumidas</h2>
+      <form id="mealForm" class="grid-form">
+        <label>Data
+          <input type="date" id="mealDate" required />
+        </label>
+        <label>Tipo
+          <select id="mealType" required>
+            <option>Café da manhã</option>
+            <option>Almoço</option>
+            <option>Lanche</option>
+            <option>Jantar</option>
+            <option>Ceia</option>
+          </select>
+        </label>
+        <label>Alimento
+          <select id="mealFood" required></select>
+        </label>
+        <label>Quantidade (gramas)
+          <input type="number" id="mealGrams" min="1" step="1" value="100" required />
+        </label>
+        <button type="submit">Adicionar refeição</button>
+      </form>
+      <ul id="mealList" class="list"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Hidratação diária</h2>
+      <div class="water-actions">
+        <button data-water="200">+200 ml</button>
+        <button data-water="300">+300 ml</button>
+        <button data-water="500">+500 ml</button>
+        <button type="button" id="resetWater" class="secondary">Zerar dia</button>
+      </div>
+      <p id="waterStatus" class="metric"></p>
+      <ul id="waterHistory" class="list compact"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Histórico de peso e medidas</h2>
+      <form id="progressForm" class="grid-form">
+        <label>Data
+          <input type="date" id="progressDate" required />
+        </label>
+        <label>Peso (kg)
+          <input type="number" id="progressWeight" min="30" step="0.1" required />
+        </label>
+        <label>Cintura (cm)
+          <input type="number" id="measureWaist" min="30" step="0.1" required />
+        </label>
+        <label>Quadril (cm)
+          <input type="number" id="measureHip" min="30" step="0.1" required />
+        </label>
+        <label>Braço (cm)
+          <input type="number" id="measureArm" min="10" step="0.1" required />
+        </label>
+        <button type="submit">Salvar evolução</button>
+      </form>
+      <ul id="progressList" class="list"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Resumo do dia</h2>
+      <label>Data analisada
+        <input type="date" id="summaryDate" />
+      </label>
+      <div id="summary" class="summary-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <small>Dados salvos localmente no navegador. Consulte nutricionista para ajustes clínicos.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
