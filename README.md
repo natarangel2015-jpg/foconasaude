@@ -15,13 +15,23 @@ App web para mulheres que querem atingir objetivo físico com acompanhamento de 
 
 ## Executar localmente
 
-Abra o `index.html` no navegador, ou rode um servidor local:
+### Modo estático
+Abra o `index.html` no navegador.
 
+### Modo servidor (igual deploy)
 ```bash
-python3 -m http.server 5173
+pip install -r requirements.txt
+python app.py
 ```
 
-Acesse: `http://localhost:5173`
+Acesse: `http://localhost:5000`
+
+## Deploy no Render
+
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn app:app`
+
+Esses arquivos já estão no repositório (`requirements.txt`, `Procfile` e `app.py`).
 
 ## Observação importante
 
