@@ -30,8 +30,11 @@ Acesse: `http://localhost:5000`
 
 - Build command: `pip install -r requirements.txt`
 - Start command: `gunicorn app:app`
+- Compatível também com start legado: `gunicorn your_application.wsgi`
 
-Esses arquivos já estão no repositório (`requirements.txt`, `Procfile` e `app.py`).
+Se o painel do Render estiver com `gunicorn your_application.wsgi`, pode manter (agora está suportado) ou trocar para `gunicorn app:app`.
+
+Esses arquivos já estão no repositório (`requirements.txt`, `Procfile`, `app.py` e `your_application/wsgi.py`).
 
 ## Observação importante
 
