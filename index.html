@@ -16,6 +16,28 @@
     <section class="card">
       <h2>Objetivo e metas diárias</h2>
       <form id="profileForm" class="grid-form">
+        <label>Objetivo principal
+          <select id="goalType" required>
+            <option value="loss_weight">Perda de peso</option>
+            <option value="fat_loss">Perda de gordura (recomposição)</option>
+            <option value="muscle_gain">Ganho de massa</option>
+            <option value="glute_gain">Aumentar glúteos</option>
+          </select>
+        </label>
+        <label>Nível de atividade
+          <select id="activityLevel" required>
+            <option value="sedentary">Sedentária</option>
+            <option value="light">Leve (1-3x/semana)</option>
+            <option value="moderate">Moderada (3-5x/semana)</option>
+            <option value="intense">Intensa (6-7x/semana)</option>
+          </select>
+        </label>
+        <label>Idade
+          <input type="number" id="age" min="14" step="1" required />
+        </label>
+        <label>Altura (cm)
+          <input type="number" id="height" min="130" step="1" required />
+        </label>
         <label>Peso atual (kg)
           <input type="number" id="currentWeight" min="30" step="0.1" required />
         </label>
@@ -37,9 +59,14 @@
         <label>Água (ml)
           <input type="number" id="goalWater" min="500" step="100" required />
         </label>
-        <button type="submit">Salvar metas</button>
+
+        <div class="dual-actions">
+          <button type="button" id="autoGoalBtn">Gerar metas automáticas</button>
+          <button type="submit" class="secondary">Salvar metas</button>
+        </div>
       </form>
       <p id="goalSummary" class="muted"></p>
+      <div id="microTargets" class="summary-grid"></div>
     </section>
 
     <section class="card">

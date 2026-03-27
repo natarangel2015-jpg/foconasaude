@@ -4,8 +4,10 @@ App web para mulheres que querem atingir objetivo físico com acompanhamento de 
 
 ## O que o app faz
 
-- Define metas diárias: calorias, proteína, carboidrato, gordura e água.
-- Registra alimentos com informação nutricional completa por porção.
+- Define objetivo principal (perda de peso, recomposição, ganho de massa, aumentar glúteos).
+- Gera automaticamente metas de calorias, macros e água com base em idade, altura, peso e atividade.
+- Sugere metas de micronutrientes diários (fibra, cálcio, ferro, vitamina C, ômega-3, potássio e sódio máximo).
+- Registra alimentos com informação nutricional por porção.
 - Busca produtos no **Open Food Facts** para preencher macros rapidamente.
 - Registra refeições por data e calcula automaticamente o consumo diário.
 - Mostra o quanto ainda falta para bater as metas de macros.

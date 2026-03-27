@@ -1,7 +1,11 @@
-const storageKey = "nutriplanner-women-v2";
+const storageKey = "nutriplanner-women-v3";
 
 const defaultState = {
   profile: {
+    goalType: "loss_weight",
+    activityLevel: "moderate",
+    age: 30,
+    height: 165,
     currentWeight: 70,
     targetWeight: 62,
     goalCalories: 1900,
@@ -9,6 +13,15 @@ const defaultState = {
     goalCarbs: 180,
     goalFat: 60,
     goalWater: 2200,
+    microTargets: {
+      fiber: 28,
+      calcium: 1000,
+      iron: 18,
+      vitaminC: 75,
+      omega3: 1.1,
+      potassium: 2600,
+      sodiumMax: 2000,
+    },
   },
   foods: [
     { id: crypto.randomUUID(), name: "Frango grelhado", serving: 100, calories: 165, protein: 31, carbs: 0, fat: 3.6 },
@@ -46,6 +59,61 @@ function format(value, max = 1) {
   return Number(value || 0).toLocaleString("pt-BR", { maximumFractionDigits: max });
 }
 
+function getActivityFactor(level) {
+  return {
+    sedentary: 1.2,
+    light: 1.37,
+    moderate: 1.55,
+    intense: 1.72,
+  }[level] ?? 1.55;
+}
+
+function getGoalPreset(goalType) {
+  const presets = {
+    loss_weight: { kcalAdjust: -400, proteinPct: 0.35, carbsPct: 0.35, fatPct: 0.3, waterPerKg: 35 },
+    fat_loss: { kcalAdjust: -250, proteinPct: 0.4, carbsPct: 0.3, fatPct: 0.3, waterPerKg: 38 },
+    muscle_gain: { kcalAdjust: 280, proteinPct: 0.3, carbsPct: 0.45, fatPct: 0.25, waterPerKg: 40 },
+    glute_gain: { kcalAdjust: 200, proteinPct: 0.3, carbsPct: 0.5, fatPct: 0.2, waterPerKg: 40 },
+  };
+  return presets[goalType] ?? presets.loss_weight;
+}
+
+function estimateGoals(profile) {
+  const age = Number(profile.age);
+  const height = Number(profile.height);
+  const weight = Number(profile.currentWeight);
+  const activityFactor = getActivityFactor(profile.activityLevel);
+  const preset = getGoalPreset(profile.goalType);
+
+  const bmrFemale = 10 * weight + 6.25 * height - 5 * age - 161;
+  const tdee = bmrFemale * activityFactor;
+  const calories = Math.max(1200, Math.round(tdee + preset.kcalAdjust));
+
+  const protein = Math.round((calories * preset.proteinPct) / 4);
+  const carbs = Math.round((calories * preset.carbsPct) / 4);
+  const fat = Math.round((calories * preset.fatPct) / 9);
+  const water = Math.round(weight * preset.waterPerKg);
+
+  const fiber = Math.round((calories / 1000) * 14);
+
+  return {
+    goalCalories: calories,
+    goalProtein: protein,
+    goalCarbs: carbs,
+    goalFat: fat,
+    goalWater: water,
+    microTargets: {
+      fiber,
+      calcium: 1000,
+      iron: 18,
+      vitaminC: 75,
+      omega3: 1.1,
+      potassium: 2600,
+      sodiumMax: 2000,
+    },
+  };
+}
+
 function getMealTotalsByDate(date) {
   const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, meals: 0 };
 
@@ -65,8 +133,34 @@ function getMealTotalsByDate(date) {
   return totals;
 }
 
+function renderMicroTargets() {
+  const m = state.profile.microTargets;
+  el("microTargets").innerHTML = `
+    <article><strong>Fibra:</strong> ${format(m.fiber)} g/dia</article>
+    <article><strong>Cálcio:</strong> ${format(m.calcium)} mg/dia</article>
+    <article><strong>Ferro:</strong> ${format(m.iron)} mg/dia</article>
+    <article><strong>Vitamina C:</strong> ${format(m.vitaminC)} mg/dia</article>
+    <article><strong>Ômega-3:</strong> ${format(m.omega3)} g/dia</article>
+    <article><strong>Potássio:</strong> ${format(m.potassium)} mg/dia</article>
+    <article><strong>Sódio máximo:</strong> ${format(m.sodiumMax)} mg/dia</article>
+  `;
+}
+
+function getGoalLabel(goalType) {
+  return {
+    loss_weight: "Perda de peso",
+    fat_loss: "Perda de gordura (recomposição)",
+    muscle_gain: "Ganho de massa",
+    glute_gain: "Aumentar glúteos",
+  }[goalType] ?? goalType;
+}
+
 function renderProfile() {
   const p = state.profile;
+  el("goalType").value = p.goalType;
+  el("activityLevel").value = p.activityLevel;
+  el("age").value = p.age;
+  el("height").value = p.height;
   el("currentWeight").value = p.currentWeight;
   el("targetWeight").value = p.targetWeight;
   el("goalCalories").value = p.goalCalories;
@@ -77,7 +171,10 @@ function renderProfile() {
 
   const diff = p.currentWeight - p.targetWeight;
   const direction = diff > 0 ? "reduzir" : "ganhar";
-  el("goalSummary").textContent = `Meta atual: ${direction} ${format(Math.abs(diff))} kg para chegar em ${format(p.targetWeight)} kg.`;
+  const note = p.goalType === "fat_loss" ? "Obs.: não existe perda localizada isolada; o foco é recomposição." : "";
+
+  el("goalSummary").textContent = `Objetivo: ${getGoalLabel(p.goalType)}. Meta atual: ${direction} ${format(Math.abs(diff))} kg para chegar em ${format(p.targetWeight)} kg. ${note}`;
+  renderMicroTargets();
 }
 
 function renderFoods() {
@@ -275,10 +372,42 @@ function renderOpenFoodResults(products) {
   });
 }
 
+function applyAutomaticGoals() {
+  const profileInput = {
+    goalType: el("goalType").value,
+    activityLevel: el("activityLevel").value,
+    age: Number(el("age").value),
+    height: Number(el("height").value),
+    currentWeight: Number(el("currentWeight").value),
+    targetWeight: Number(el("targetWeight").value),
+  };
+
+  const estimated = estimateGoals(profileInput);
+  el("goalCalories").value = estimated.goalCalories;
+  el("goalProtein").value = estimated.goalProtein;
+  el("goalCarbs").value = estimated.goalCarbs;
+  el("goalFat").value = estimated.goalFat;
+  el("goalWater").value = estimated.goalWater;
+
+  state.profile = { ...state.profile, ...profileInput, ...estimated };
+  saveState();
+  renderProfile();
+  renderSummary(el("summaryDate").value);
+  renderWater();
+  renderPlanner();
+}
+
 function bindEvents() {
+  el("autoGoalBtn").addEventListener("click", applyAutomaticGoals);
+
   el("profileForm").addEventListener("submit", (event) => {
     event.preventDefault();
     state.profile = {
+      ...state.profile,
+      goalType: el("goalType").value,
+      activityLevel: el("activityLevel").value,
+      age: Number(el("age").value),
+      height: Number(el("height").value),
       currentWeight: Number(el("currentWeight").value),
       targetWeight: Number(el("targetWeight").value),
       goalCalories: Number(el("goalCalories").value),
