@@ -1,4 +1,5 @@
 from app import app
 
-# Render/Heroku compatibility entrypoint when start command is:
-# gunicorn your_application.wsgi
+# Gunicorn default callable when command is `gunicorn your_application.wsgi`
+# is `application`, so we expose both names.
+application = app
